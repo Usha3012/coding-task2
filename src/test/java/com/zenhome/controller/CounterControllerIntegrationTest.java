@@ -1,5 +1,7 @@
 package com.zenhome.controller;
 
+import com.zenhome.Application;
+import com.zenhome.domain.ConsumptionDTO;
 import io.restassured.RestAssured;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import com.zenhome.Application;
-import com.zenhome.domain.ConsumptionDTO;
 
 import java.math.BigDecimal;
 
@@ -55,6 +55,44 @@ public class CounterControllerIntegrationTest {
                 .then()
                 .statusCode(201)
                 .body("counter_id", equalTo(1));
+
+    }
+
+    @Test
+    public void stop_create_consumption_when_negative_amount() {
+        ConsumptionDTO consumptionDTO = ConsumptionDTO.builder()
+                .amount(new BigDecimal("-1"))
+                .counterId(1)
+                .build();
+
+        given()
+                .log().all()
+                .body(consumptionDTO)
+                .header("content-type", "application/json")
+                .when()
+                .post(BASE_URL + "/counter_callback")
+                .prettyPeek()
+                .then()
+                .statusCode(400);
+
+    }
+
+    @Test
+    public void stop_create_consumption_when_invalid_amount() {
+        String invalidRequest = " {\n" +
+                "      \"counter_id\":3,\n" +
+                "      \"amount\": \"abcd\"\n" +
+                " }";
+
+        given()
+                .log().all()
+                .body(invalidRequest)
+                .header("content-type", "application/json")
+                .when()
+                .post(BASE_URL + "/counter_callback")
+                .prettyPeek()
+                .then()
+                .statusCode(400);
 
     }
 

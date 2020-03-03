@@ -41,7 +41,6 @@ public class CounterService {
                 .amount(savedConsumption.getAmount()).build();
     }
 
-
     public CounterDTO getCounterById(int id) {
         Counter counter = counterRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Counter with id " + id + " not exists"));
